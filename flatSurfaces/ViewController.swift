@@ -35,6 +35,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Create a session configuration
         let configuration = ARWorldTrackingConfiguration()
+        
+        //Enable horizontal plane deteccion
+        configuration.planeDetection = [.horizontal]
 
         // Run the view's session
         sceneView.session.run(configuration)
@@ -48,6 +51,30 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
 
     // MARK: - ARSCNViewDelegate
+   
+    func createShip(planeAnchor: ARPlaneAnchor) -> SCNNode
+    {
+        let node = SCNScene(named: "art.scnassets/ship.scn")!.rootNode.clone()
+        node.position = SCNVector3(planeAnchor.center.x, 0.0, planeAnchor.center.z)
+        return node
+    }
+    
+    func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
+        guard let planeAnchor = anchor as? ARPlaneAnchor,
+            let planeNode = node.childNodes.first,
+            let plane = planeNode.geometry as? SCNPlane
+            else
+            {return}
+        planeNode.position = SCNVector3(planeAnchor.center.x, 0.0, planeAnchor.center.z)
+               plane.width = CGFloat(planeAnchor.extent.x)
+               plane.height = CGFloat(planeAnchor.extent.z)
+        
+        print("A new plane has been discovered.")
+       
+        let floor = createFloor(planeAnchor: planeAnchor)
+        node.addChildNode(floor)
+       
+    }
     
 /*
     // Override to create and configure nodes for anchors added to the view's session.
@@ -70,6 +97,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     func sessionInterruptionEnded(_ session: ARSession) {
         // Reset tracking and/or remove existing anchors if consistent tracking is required
+        
+    }
+    
+    func createFloor(planeAnchor: ARPlaneAnchor) -> SCNNode {
+        let node = SCNNode()
+        
+        let geometry = SCNPlane(width: CGFloat(planeAnchor.extent.x), height: CGFloat(planeAnchor.extent.z))
+        node.geometry = geometry
+        node.eulerAngles.x = -Float.pi/2
+        node.opacity = 0.25
+        
+        return node
         
     }
 }
