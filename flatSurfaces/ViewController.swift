@@ -59,20 +59,20 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         return node
     }
     
-    func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
-        guard let planeAnchor = anchor as? ARPlaneAnchor,
-            let planeNode = node.childNodes.first,
-            let plane = planeNode.geometry as? SCNPlane
+    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+        guard let planeAnchor = anchor as? ARPlaneAnchor
             else
             {return}
-        planeNode.position = SCNVector3(planeAnchor.center.x, 0.0, planeAnchor.center.z)
-               plane.width = CGFloat(planeAnchor.extent.x)
-               plane.height = CGFloat(planeAnchor.extent.z)
+        let floor = createFloor(planeAnchor: planeAnchor)
+        node.addChildNode(floor)
+        
+        let ship = createShip(planeAnchor: planeAnchor)
+        node.addChildNode(ship)
+       
         
         print("A new plane has been discovered.")
        
-        let floor = createFloor(planeAnchor: planeAnchor)
-        node.addChildNode(floor)
+        
        
     }
     
